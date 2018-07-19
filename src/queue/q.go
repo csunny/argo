@@ -20,5 +20,6 @@ type ItemQueuer interface {
 
 // New creates a new ItemQueue
 func (s *ItemQueue) New() *ItemQueue{
-
+	s.items = []Item{}
+	return s
 }
