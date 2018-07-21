@@ -106,13 +106,13 @@ func (g *ItemGraph) Bfs(f func(node *Node))  {
 	q.Enqueue(*n)
 
 	visited := make(map[*Node]bool)
+	visited[n] = true
 
 	for {
 		if q.IsEmpty(){
 			break
 		}
 		node := q.Dequeue()
-		visited[node] = true
 		near := g.Edges[*node]
 
 		for i :=0; i<len(near); i++{
@@ -181,6 +181,8 @@ func (g *ItemGraph) Dfs(f func(node *Node)) {
 	stack.push(*n)
 
 	visited := make(map[*Node] bool)
+
+	visited[n] = true
 
 	for {
 		if stack.IsEmpty(){
