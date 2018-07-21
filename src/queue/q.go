@@ -28,7 +28,7 @@ func (s *ItemQueue) Enqueue(t Item) {
 }
 
 // dequeue
-func (s *ItemQueue) Dequeue() *Item {
+func (s *ItemQueue) Dequeue() Item {
 	item := s.items[0] // 先进先出
 	s.items = s.items[1:len(s.items)]
 
