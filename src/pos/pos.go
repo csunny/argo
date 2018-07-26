@@ -63,7 +63,8 @@ func generateBlock(oldBlock Block, BPM int, address string) (Block, error) {
 	newBlock.Index = oldBlock.Index + 1
 	newBlock.BPM = BPM
 	newBlock.Timestamp = t.String()
-	newBlock.PrevHash = calculateBlockHash(newBlock)
+	newBlock.PrevHash = oldBlock.Hash
+	newBlock.Hash = calculateBlockHash(newBlock)
 	newBlock.Validator = address
 
 	return newBlock, nil
@@ -145,6 +146,8 @@ func handleConn(conn net.Conn) {
 					continue
 				}
 
+				spew.Dump(newBlock, oldLastIndex)
+
 				if isBlockValid(newBlock, oldLastIndex) {
 					candidateBlocks <- newBlock
 				}
@@ -174,7 +177,7 @@ func handleConn(conn net.Conn) {
 // to the blockchain
 // by random selecting from the pool, weighted by amount of tokens staked
 func PickWinner() {
-	time.Sleep(30 * time.Second)
+	time.Sleep(10 * time.Second)
 	mutex.Lock()
 
 	temp := tempBlocks
@@ -236,7 +239,7 @@ func PickWinner() {
 }
 
 //
-func Run()  {
+func Run() {
 
 	// create a genesis block
 	t := time.Now()
@@ -249,14 +252,14 @@ func Run()  {
 
 	// start TCP and serve TCP server
 	server, err := net.Listen("tcp", ":9090")
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 
 	defer server.Close()
 
 	go func() {
-		for candidate := range candidateBlocks{
+		for candidate := range candidateBlocks {
 			mutex.Lock()
 			tempBlocks = append(tempBlocks, candidate)
 			mutex.Unlock()
@@ -271,7 +274,7 @@ func Run()  {
 
 	for {
 		conn, err := server.Accept()
-		if err != nil{
+		if err != nil {
 			log.Fatal(err)
 		}
 
