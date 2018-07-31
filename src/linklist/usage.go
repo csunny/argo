@@ -1,5 +1,10 @@
 package linklist
 
+import (
+	"strconv"
+	"fmt"
+)
+
 // ### 链表使用
 
 // 一、  反转链表中间部分
@@ -39,7 +44,7 @@ func (head *LinkNode) MediumReverse(m, n int) *LinkNode {
 
 	if preNode != nil {
 		preNode.Next = newHead
-	}else {
+	} else {
 		result = newHead
 	}
 
@@ -51,3 +56,25 @@ func (head *LinkNode) MediumReverse(m, n int) *LinkNode {
 // 三、 合并两个排好序的链表
 
 // 四、 约瑟夫环
+func (tail *LinkNode) NewJosphuseRing(num int) *LinkNode {
+	// 构造一个环
+	for i := 0; i < num; i++ {
+		fmt.Printf("%d\n", i)
+
+		if tail.Payload == "" {
+			tail := LinkNode{Payload: strconv.Itoa(i)}
+			tail.Next = &tail
+			fmt.Printf("---%s\n", tail.Payload)
+		} else {
+			newNode := LinkNode{Payload: strconv.Itoa(i)}
+			fmt.Printf("===%s\n", newNode.Payload)
+
+			newNode.Next = tail.Next
+			tail.Next = &newNode
+
+			tail = &newNode
+		}
+	}
+
+	return tail
+}
