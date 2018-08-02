@@ -125,7 +125,7 @@ func (kc *KademliaCore) FindNode(args *FindNodeRequest, response *FindNodeRespon
 	response.contacts = make([]Contract, len(contancts))
 
 	for i := 0; i < len(contancts); i++ {
-		response.contacts[i] = contancts[i]
+		response.contacts[i] = *contancts[i].(*ContractRecord).node
 	}
 
 	return nil

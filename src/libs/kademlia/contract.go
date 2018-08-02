@@ -10,7 +10,7 @@ type Contract struct {
 }
 
 func (contract *Contract) String() string {
-	return fmt.Sprintf("Contract(\"s\", \"s\")", contract.id, contract.address)
+	return fmt.Sprintf("Contract(\"%s\", \"%s\")", contract.id, contract.address)
 }
 
 
