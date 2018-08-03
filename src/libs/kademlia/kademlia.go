@@ -47,7 +47,8 @@ func NewKademlia(contract *Contract, networkId string) (ret *Kademlia) {
 }
 
 func (k *Kademlia) Serve() error {
-	rpc.Register(&KademliaCore{k})
+	//rpc.Register(&KademliaCore{k})
+	rpc.RegisterName("KademliaCore", KademliaCore{k})
 
 	rpc.HandleHTTP()
 

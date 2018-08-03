@@ -46,12 +46,12 @@ func (table *RoutingTable) Update(contract *Contract) {
 		}
 	}
 
-	iter_back := bucket.Back()
-	for iter_back != nil {
-		if Equal(iter_back.Value, table) == true {
+	iterBack := bucket.Back()
+	for iterBack != nil {
+		if Equal(iterBack.Value, table) == true {
 			element = bucket.Back()
 		} else {
-			iter_back = bucket.Back().Next()
+			iterBack = bucket.Back().Next()
 		}
 	}
 
@@ -76,18 +76,18 @@ func Equal(x interface{}, table *RoutingTable) bool {
 
 func (table *RoutingTable) FindClosest(target NodeID, count int) (ret []interface{}) {
 
-	bucket_num := target.Xor(table.node.id).PrefixLen()
-	bucket := table.buckets[bucket_num]
+	bucketNum := target.Xor(table.node.id).PrefixLen()
+	bucket := table.buckets[bucketNum]
 
 	ret = append(ret, bucket.Front())
 
-	for i := 1; (bucket_num-i >= 0 || bucket_num+i < IdLength*8) && len(ret) < count; i++ {
-		if bucket_num-i >= 0 {
-			bucket = table.buckets[bucket_num-i]
+	for i := 1; (bucketNum-i >= 0 || bucketNum+i < IdLength*8) && len(ret) < count; i++ {
+		if bucketNum-i >= 0 {
+			bucket = table.buckets[bucketNum-i]
 			ret = append(ret, bucket.Front())
 		}
-		if bucket_num+i < IdLength*8 {
-			bucket = table.buckets[bucket_num+i]
+		if bucketNum+i < IdLength*8 {
+			bucket = table.buckets[bucketNum+i]
 			ret = append(ret, bucket.Front())
 		}
 	}
