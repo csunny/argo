@@ -31,7 +31,7 @@ func NewRoutingTable(node *Contract) (ret *RoutingTable) {
 }
 
 func (table *RoutingTable) Update(contract *Contract) {
-	prefixLength := contract.id.Xor(table.node.id).PrefixLen()
+	prefixLength := contract.Id.Xor(table.node.Id).PrefixLen()
 	bucket := table.buckets[prefixLength]
 
 	var element interface{}
@@ -71,12 +71,12 @@ func (table *RoutingTable) Update(contract *Contract) {
 }
 
 func Equal(x interface{}, table *RoutingTable) bool {
-	return x.(*Contract).id.Equals(table.node.id)
+	return x.(*Contract).Id.Equals(table.node.Id)
 }
 
 func (table *RoutingTable) FindClosest(target NodeID, count int) (ret []interface{}) {
 
-	bucketNum := target.Xor(table.node.id).PrefixLen()
+	bucketNum := target.Xor(table.node.Id).PrefixLen()
 	bucket := table.buckets[bucketNum]
 
 	ret = append(ret, bucket.Front())

@@ -3,9 +3,8 @@ package kademlia
 import (
 	"net/rpc"
 	"net"
-	"net/http"
 	"fmt"
-	"log"
+	//"net/http"
 )
 
 type Kademlia struct {
@@ -46,31 +45,45 @@ func NewKademlia(contract *Contract, networkId string) (ret *Kademlia) {
 	return
 }
 
+// rpc server
 func (k *Kademlia) Serve() error {
-	//rpc.Register(&KademliaCore{k})
-	rpc.RegisterName("KademliaCore", KademliaCore{k})
+	rpc.RegisterName("KademliaCore", &KademliaCore{k})
 
-	rpc.HandleHTTP()
+	listener, err := net.Listen("tcp", k.routers.node.Address)
 
-	l, err := net.Listen("tcp", k.routers.node.address)
+	//rpc.HandleHTTP()
 
 	if err != nil {
 		return err
 	}
-	go http.Serve(l, nil)
+
+	conn, err := listener.Accept()
+	fmt.Println(conn.LocalAddr())
+	if err != nil {
+		return err
+	}
+	//go http.Serve(listener, nil)
+	go rpc.ServeConn(conn)
+
+	go fmt.Println(k.routers)
+	select{}
 	return nil
 }
 
+// rpc client
 func (k *Kademlia) Call(contract *Contract, method string, args, reply interface{}) error {
-	client, err := rpc.DialHTTP("tcp", contract.address)
+	client, err := rpc.Dial("tcp", contract.Address)
 	if err != nil {
 		return err
 	}
 
+	fmt.Println(method, args)
 	err = client.Call(method, args, reply)
 	if err != nil {
-		return nil
+		return err
 	}
+
+	fmt.Println("reply:", reply)
 
 	k.routers.Update(contract)
 	return nil
@@ -94,9 +107,9 @@ func (k *Kademlia) InterativeFindNode(target NodeID, delta int) []Contract {
 }
 
 func (k *Kademlia) HandleRPC(request, response *RPCHeader) error {
-	if request.networkId != k.NetworkId {
-		return fmt.Errorf("---")
-	}
+	//if request.networkId != k.NetworkId {
+	//	return fmt.Errorf("Excepted networkID %s, got %s", k.NetworkId, request.networkId)
+	//}
 
 	if request.Sender != nil {
 		k.routers.Update(request.Sender)
@@ -112,7 +125,7 @@ func (kc *KademliaCore) Ping(args *PingRequest, response *PingResponce) error {
 		return err
 	}
 
-	log.Printf("ping from %s", args.RPCHeader)
+	fmt.Printf("ping from %s", args.RPCHeader)
 	return nil
 }
 
