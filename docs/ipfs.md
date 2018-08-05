@@ -1,3 +1,38 @@
+
+[TOC]
+
+# 简介
+
+
+# 理论介绍
+IPFS is the Distributed Web.
+
+
+# IPFS安装
+## Go 安装
+go get github.com/ipfs/go-ipfs
+
+## 源码安装
+
+- 下载源码: [源码](https://dist.ipfs.io/#go-ipfs)
+- 解压
+```
+tar xvfz go-ipfs.tar.gz
+```
+- 安装
+```
+cd go-ipfs
+./install.sh
+```
+
+## 测试安装
+```
+ipfs --help
+```
+在终端有如下输出
+
+
+
 # IPFS
 
 ## 0.1 - Quick Start
@@ -113,3 +148,6 @@ Browse:
   markdown renderer app:
 
     http://localhost:8080/ipfs/QmX7M9CiYXjVeFnkfVGf3y5ixTZ2ACeSGyL1vBJY1HvQPp/mdown
+
+
+
