@@ -4,7 +4,6 @@ import (
 	"net/rpc"
 	"net"
 	"fmt"
-	//"net/http"
 )
 
 type Kademlia struct {
@@ -51,8 +50,6 @@ func (k *Kademlia) Serve() error {
 
 	listener, err := net.Listen("tcp", k.routers.node.Address)
 
-	//rpc.HandleHTTP()
-
 	if err != nil {
 		return err
 	}
@@ -62,7 +59,6 @@ func (k *Kademlia) Serve() error {
 	if err != nil {
 		return err
 	}
-	//go http.Serve(listener, nil)
 	go rpc.ServeConn(conn)
 
 	go fmt.Println(k.routers)
@@ -102,10 +98,6 @@ func (k *Kademlia) sendQuery(node *Contract, target NodeID, done chan []Contract
 
 }
 
-func (k *Kademlia) InterativeFindNode(target NodeID, delta int) []Contract {
-	return []Contract{}
-}
-
 func (k *Kademlia) HandleRPC(request, response *RPCHeader) error {
 	//if request.networkId != k.NetworkId {
 	//	return fmt.Errorf("Excepted networkID %s, got %s", k.NetworkId, request.networkId)
@@ -138,9 +130,11 @@ func (kc *KademliaCore) FindNode(args *FindNodeRequest, response *FindNodeRespon
 	contancts := kc.kad.routers.FindClosest(args.target, BucketSize)
 	response.contacts = make([]Contract, len(contancts))
 
-	for i := 0; i < len(contancts); i++ {
-		response.contacts[i] = *contancts[i].(*ContractRecord).node
-	}
+	//for i := 0; i < len(contancts); i++ {
+	//	// todo there is some error，need to update
+	//	// hashtable need to rewrite.
+	//	response.contacts[i] = *contancts[i].(*ContractRecord).node
+	//}
 
 	return nil
 }
