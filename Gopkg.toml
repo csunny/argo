@@ -1,0 +1,90 @@
+# Gopkg.toml example
+#
+# Refer to https://golang.github.io/dep/docs/Gopkg.toml.html
+# for detailed Gopkg.toml documentation.
+#
+# required = ["github.com/user/thing/cmd/thing"]
+# ignored = ["github.com/user/project/pkgX", "bitbucket.org/user/project/pkgA/pkgY"]
+#
+# [[constraint]]
+#   name = "github.com/user/project"
+#   version = "1.0.0"
+#
+# [[constraint]]
+#   name = "github.com/user/project2"
+#   branch = "dev"
+#   source = "github.com/myfork/project2"
+#
+# [[override]]
+#   name = "github.com/x/y"
+#   version = "2.4.0"
+#
+# [prune]
+#   non-go = false
+#   go-tests = true
+#   unused-packages = true
+
+
+[[constraint]]
+  name = "github.com/davecgh/go-spew"
+  version = "1.1.1"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/golang/glog"
+
+[[constraint]]
+  name = "github.com/golang/protobuf"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/grpc-ecosystem/grpc-gateway"
+  version = "1.4.1"
+
+[[constraint]]
+  name = "github.com/ipfs/go-log"
+  version = "1.5.3"
+
+[[constraint]]
+  name = "github.com/libp2p/go-libp2p"
+  version = "6.0.9"
+
+[[constraint]]
+  name = "github.com/libp2p/go-libp2p-crypto"
+  version = "1.6.2"
+
+[[constraint]]
+  name = "github.com/libp2p/go-libp2p-host"
+  version = "3.0.7"
+
+[[constraint]]
+  name = "github.com/libp2p/go-libp2p-net"
+  version = "3.0.8"
+
+[[constraint]]
+  name = "github.com/libp2p/go-libp2p-peer"
+  version = "2.3.6"
+
+[[constraint]]
+  name = "github.com/libp2p/go-libp2p-peerstore"
+  version = "1.4.23"
+
+[[constraint]]
+  name = "github.com/multiformats/go-multiaddr"
+  version = "1.2.7"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/whyrusleeping/go-logging"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/net"
+
+[[constraint]]
+  name = "google.golang.org/grpc"
+  version = "1.14.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true
