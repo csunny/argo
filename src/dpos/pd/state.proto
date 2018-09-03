@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package dpospb;
+
+message DposRoot {
+    int64 timestamp = 1;
+    bytes proposer = 2;
+
+    bytes dynasty_root = 3;
+}
