@@ -10,13 +10,15 @@ import (
 	"time"
 )
 
+var BlockChain []Block
+
 type Block struct {
 	Index     int
 	Timestamp string
 	BPM       int
 	Hash      string
 	PrevHash  string
-	Validator string
+	validator string
 }
 
 // 计算string的hash值
@@ -41,7 +43,7 @@ func GenerateBlock(oldBlock Block, BPM int, address string) (Block, error) {
 	newBlock.Timestamp = t.String()
 	newBlock.PrevHash = oldBlock.Hash
 	newBlock.Hash = CaculateBlockHash(newBlock)
-	newBlock.Validator = address
+	newBlock.validator = address
 
 	return newBlock, nil
 }

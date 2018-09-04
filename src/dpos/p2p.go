@@ -6,11 +6,18 @@ package dpos
 import (
 	"io"
 	"fmt"
+	"os"
+	"strings"
+	"strconv"
+	"time"
 	"crypto/rand"
 	"flag"
 	"log"
-	mrand "math/rand"
+	"bufio"
+	"sync"
+	"encoding/json"
 	"context"
+	mrand "math/rand"
 	"github.com/libp2p/go-libp2p-net"
 	"github.com/libp2p/go-libp2p-host"
 	"github.com/libp2p/go-libp2p-crypto"
@@ -18,7 +25,18 @@ import (
 	"github.com/libp2p/go-libp2p-peer"
 	ma "github.com/multiformats/go-multiaddr"
 	pstore "github.com/libp2p/go-libp2p-peerstore"
+	"github.com/davecgh/go-spew/spew"
 )
+
+const DefaultVote = 10
+const FileName = "config.ini"
+
+var mutex = &sync.Mutex{}
+
+type Validator struct {
+	name string
+	vote int
+}
 
 func MakeBasicHost(listenPort int, secio bool, randseed int64) (host.Host, error) {
 	var r io.Reader
@@ -36,7 +54,7 @@ func MakeBasicHost(listenPort int, secio bool, randseed int64) (host.Host, error
 	}
 
 	opts := []libp2p.Option{
-		libp2p.ListenAddrStrings(fmt.Sprintf("/ipv4/127.0.0.1/tcp/%d", listenPort)),
+		libp2p.ListenAddrStrings(fmt.Sprintf("/ip4/127.0.0.1/tcp/%d", listenPort)),
 		libp2p.Identity(priv),
 	}
 
@@ -56,21 +74,124 @@ func MakeBasicHost(listenPort int, secio bool, randseed int64) (host.Host, error
 	addr := basicHost.Addrs()[0]
 	fullAddr := addr.Encapsulate(hostAddr)
 
-	log.Print("我是: %s\n", fullAddr)
+	log.Printf("我是: %s\n", fullAddr)
+	SavePeer(basicHost.ID().Pretty())
 
 	if secio {
-		log.Printf("现在在一个新终端运行命令: 'go run main.go -l %d -d %s -secio'\n ", listenPort+1, fullAddr)
+		log.Printf("现在在一个新终端运行命令: 'go run main/dpos.go -l %d -d %s -secio'\n ", listenPort+1, fullAddr)
 	} else {
-		log.Printf("现在在一个新的终端运行命令: 'go run main.go -l %d -d %s '", listenPort+1, fullAddr)
+		log.Printf("现在在一个新的终端运行命令: 'go run main/dpos.go -l %d -d %s '", listenPort+1, fullAddr)
 	}
 	return basicHost, nil
 }
 
 func HandleStream(s net.Stream) {
-	log.Println("Got a new stream!")
+	log.Println("得到一个新的连接!", s.Conn().RemotePeer().Pretty())
+	// 将连接加入到
+	rw := bufio.NewReadWriter(bufio.NewReader(s), bufio.NewWriter(s))
+	go readData(rw)
+	go writeData(rw)
+}
+
+func readData(rw *bufio.ReadWriter) {
+	for {
+		str, err := rw.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if str == "" {
+			return
+		}
+		if str != "\n" {
+			chain := make([]Block, 0)
+
+			if err := json.Unmarshal([]byte(str), &chain); err != nil {
+				log.Fatal(err)
+			}
+
+			mutex.Lock()
+			if len(chain) > len(BlockChain) {
+				BlockChain = chain
+				bytes, err := json.MarshalIndent(BlockChain, "", " ")
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				fmt.Printf("\x1b[32m%s\x1b[0m> ", string(bytes))
+			}
+			mutex.Unlock()
+		}
+	}
+}
+
+func writeData(rw *bufio.ReadWriter) {
+	// 启动一个协程处理终端同步
+	go func() {
+		for {
+			time.Sleep(2 * time.Second)
+			mutex.Lock()
+			bytes, err := json.Marshal(BlockChain)
+			if err != nil {
+				log.Println(err)
+			}
+			mutex.Unlock()
+
+			mutex.Lock()
+			rw.WriteString(fmt.Sprintf("%s\n", string(bytes)))
+			rw.Flush()
+			mutex.Unlock()
+		}
+	}()
+
+	stdReader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print(">")
+		sendData, err := stdReader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		sendData = strings.Replace(sendData, "\n", "", -1)
+		bpm, err := strconv.Atoi(sendData)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// pick选择block生产者
+		address := PickWinner()
+		log.Printf("******节点%s获得了记账权利******", address)
+		lastBlock := BlockChain[len(BlockChain)-1]
+		newBlock, err := GenerateBlock(lastBlock, bpm, address)
+		if err != nil{
+			log.Fatal(err)
+		}
+
+		if IsBlockValid(newBlock, lastBlock){
+			mutex.Lock()
+			BlockChain = append(BlockChain, newBlock)
+			mutex.Unlock()
+		}
+
+		spew.Dump(BlockChain)
+
+		bytes, err := json.Marshal(BlockChain)
+		if err != nil {
+			log.Println(err)
+		}
+		mutex.Lock()
+		rw.WriteString(fmt.Sprintf("%s\n", string(bytes)))
+		rw.Flush()
+		mutex.Unlock()
+	}
 }
 
 func Run() {
+
+	t := time.Now()
+	genesisBlock := Block{}
+	genesisBlock = Block{0, t.String(), 0, CaculateBlockHash(genesisBlock), "", ""}
+	BlockChain = append(BlockChain, genesisBlock)
 
 	// 命令行传参
 	listenF := flag.Int("l", 0, "等待节点加入")
@@ -90,11 +211,11 @@ func Run() {
 	}
 
 	if *target == "" {
-		log.Println("等待节点连接")
+		log.Println("等待节点连接...")
 		ha.SetStreamHandler("/p2p/1.0.0", HandleStream)
 		select {}
 	} else {
-		ha.SetStreamHandler("p2p/1.0.0", HandleStream)
+		ha.SetStreamHandler("/p2p/1.0.0", HandleStream)
 		ipfsaddr, err := ma.NewMultiaddr(*target)
 		if err != nil {
 			log.Fatal(err)
@@ -115,16 +236,32 @@ func Run() {
 
 		// 现在我们有一个peerID和一个targetaddr，所以我们添加它到peerstore中。 让libP2P知道如何连接到它。
 		ha.Peerstore().AddAddr(peerid, targetAddr, pstore.PermanentAddrTTL)
-		log.Println("opening a stream")
+		log.Println("打开Stream")
 
 		// 构建一个新的stream从hostB到hostA
 		// 使用了相同的/p2p/1.0.0 协议
 		s, err := ha.NewStream(context.Background(), peerid, "/p2p/1.0.0")
-		if err != nil{
+		if err != nil {
 			log.Fatal(err)
 		}
 
-		log.Println(s)
+		rw := bufio.NewReadWriter(bufio.NewReader(s), bufio.NewWriter(s))
+
+		go writeData(rw)
+		go readData(rw)
+		select {}
 	}
+}
+
+func SavePeer(name string) {
+	vote := DefaultVote // 默认的投票数目
+	f, err := os.OpenFile(FileName, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+
+	f.WriteString(name + ":" + strconv.Itoa(vote) + "\n")
 
 }
