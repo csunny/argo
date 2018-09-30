@@ -1,0 +1,21 @@
+version: "2"
+services:
+  mysql:
+    image: mysql:5.6
+    expose:
+      - "3306"
+    ports:
+      - "3316:3306"
+    environment:
+      MYSQL_DATABASE: swift
+      MYSQL_ROOT_PASSWORD: 123456
+  
+  mongodb:
+    image: mongo
+    expose:
+      - "27017"
+      - "28017"
+    ports:
+      - "27017:27017"
+      - "28017:28017"
+
