@@ -11,7 +11,7 @@ import (
 )
 
 func main(){
-	k := CidToKey("Qmae5nx1xJhkHKTLWXZ3HN6BGtJy8tKEt1kw8H2wMZCaTq")
+	k := CidToKey("QmcHv3rHetEbsWkmmEJqJstssC2RuufqN8H9GMoK9W6Hop")
 	fmt.Println("cid to key", k)
 
 	c := KeyToCid("CIQPS7XYMEHNK2LLF6VKBRQEQQFYDZREWEYLH3UNZYOVISTZP377CAQ")
