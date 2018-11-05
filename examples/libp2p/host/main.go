@@ -12,11 +12,11 @@ package main
 
 import (
 	"context"
-	// "crypto/rand"
+	"crypto/rand"
 	"fmt"
 
 	libp2p "github.com/libp2p/go-libp2p"
-	// crypto "github.com/libp2p/go-libp2p-crypto"
+	crypto "github.com/libp2p/go-libp2p-crypto"
 )
 
 func main(){
@@ -32,4 +32,22 @@ func main(){
 	}
 
 	fmt.Printf("Hello world, my hosts ID is %s\n", h.ID())
+
+	// set your own keypair
+	priv, _, err := crypto.GenerateEd25519Key(rand.Reader) 
+	if err != nil{
+		panic(err)
+	}
+
+	h2, err := libp2p.New(ctx, libp2p.Identity(priv), 
+		// set your owner listen address
+		// the config takes an array of addresses, specify as many as
+		// you want.
+		libp2p.ListenAddrStrings("/ip4/0.0.0.0/tcp/9000"),
+	)
+	if err != nil{
+		panic(err)
+	}
+
+	fmt.Printf("Hello world, my second hosts ID is %s\n", h2.ID())
 }
