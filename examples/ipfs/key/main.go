@@ -14,7 +14,7 @@ func main(){
 	k := CidToKey("QmcHv3rHetEbsWkmmEJqJstssC2RuufqN8H9GMoK9W6Hop")
 	fmt.Println("cid to key", k)
 
-	c := KeyToCid("CIQPS7XYMEHNK2LLF6VKBRQEQQFYDZREWEYLH3UNZYOVISTZP377CAQ")
+	c := KeyToCid("CIQBPSVUOU3PYL6WUJ552TRS26JLONKVHJAFXR6Z5K6BF5VAWZ55R7A")
 	fmt.Println("key to cid", c)
 }
 

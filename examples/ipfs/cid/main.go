@@ -20,7 +20,7 @@ const (
 func main() {
 
 	p := cid.Prefix{
-		Version:  1,
+		Version:  0,
 		Codec:    0x70,  // prtobuf
 		MhType:   0x12,  // sha2-256
 		MhLength: -1,
