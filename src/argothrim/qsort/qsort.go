@@ -1,5 +1,6 @@
 package qsort
 
+//QuickSort 快速排序
 func QuickSort(values []int) []int {
 	if len(values) <= 1{
 		return values
