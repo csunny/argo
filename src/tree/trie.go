@@ -83,3 +83,7 @@ func NewTrie(rootHash []byte, storage *MemoryStorage, needChangelog bool) (*Trie
 func (t *Trie) RootHash() []byte {
 	return t.rootHash
 }
+
+func (t *Trie) Empty() bool {
+	return t.rootHash == nil
+}
